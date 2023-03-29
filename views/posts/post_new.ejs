@@ -1,0 +1,64 @@
+<!-- views/posts/post_new.ejs -->
+
+<div class="post-page">
+    <form action="/post/new" id="post_write_form" enctype="multipart/form-data" method="post">
+        <div class="post-new-page">
+            <h3 class="form-title">새 글 작성</h3>
+            <div class="form-input">
+                <label class="form-label" for="title">제목</label>
+                <input class="form-field" type="text" id="title" name="title" placeholder="제목을 입력하세요" value="<%= post.title %>">
+                <% if(errors.title){ %>
+                    <span class="form-error"><%= errors.title.message %></span>
+                <% } %>
+            </div>
+
+            <div class="form-input">
+                <label class="form-label" for="body">본문</label>
+                <textarea class="form-field" id="body" name="body" rows="5"><%= post.body %></textarea>
+                <% if(errors.body){ %>
+                    <span class="form-error"><%= errors.body.message %></span>
+                <% } %>
+            </div>
+
+            <div class="form-input" id="imageSection">
+                <label class="form-label" for="image">사진 업로드</label>
+                <div class="file-upload-container">
+                    <input class="file-upload-input" type="file" id="file" name="image" multiple>
+                    <div class="file-upload-button">파일 선택</div>
+                </div>
+                <div id="imageContainer" class="image-preview-container">
+                </div>
+            </div>
+
+            <div class="form-input">
+                <label class="form-label" for="location">위치</label>
+                <select class="form-field" name="location" form="post_write_form">
+                    <option>북문</option>
+                    <option>정문</option>
+                    <option>쪽문</option>
+                    <option>서문</option>
+                </select>
+            </div>
+
+            <div class="form-input">
+                <label class="form-label">작성자 <%= currentUser.userID %></label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="form-link" href="/">뒤로 가기</a>
+            <button class="form-button" type="submit">제출</button>
+        </div>
+    </form>
+    
+  </div>
+  
+  <script src="/js/fileupload.js"></script>
+  <script>
+    const fileUpload = document.querySelector('.file-upload-button');
+    const fileInput = document.querySelector('.file-upload-input');
+    fileUpload.addEventListener('click', () => {
+      fileInput.click();
+    });
+  </script>
+  

@@ -1,0 +1,30 @@
+<!-- views/users/sign_up.ejs -->
+
+<div class="login-page">
+    <div class="form">
+        <form action="/user/sign_up" method="post" class="login-form">
+            <input type="text" name="userID" placeholder="userID" value="<%= user.userID %>"/>
+            <% if(errors.userID){ %>
+                <span><%= errors.userID.message %></span>
+            <% } %>
+            <input type="text" name="name" placeholder="name" value="<%= user.name %>"/>
+            <% if(errors.name){ %>
+                <span><%= errors.name.message %></span>
+            <% } %>
+            <input type="text" name="email" placeholder="email" value="<%= user.email %>"/>
+            <% if(errors.email){ %>
+                <span><%= errors.email.message %></span>
+            <% } %>
+            <input type="password" name="password" placeholder="password"/>
+            <% if(errors.password){ %>
+                <span><%= errors.password.message %></span>
+            <% } %>
+            <input type="password" name="passwordConfirmation" placeholder="passwordConfirmation"/>
+            <% if(errors.passwordConfirmation){ %>
+                <span><%= errors.passwordConfirmation.message %></span>
+            <% } %>
+            <button>create</button>
+            <p class="message">Already registered? <a href="user/sign_in">Sign In</a></p>
+        </form>
+    </div>
+</div>

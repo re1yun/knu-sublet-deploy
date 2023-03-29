@@ -1,0 +1,26 @@
+<!-- views/partials/nav.ejs -->
+
+<div class="nav-right visible-xs">
+  <div class="button" id="btn">
+    <div class="bar top"></div>
+    <div class="bar middle"></div>
+    <div class="bar bottom"></div>
+  </div>
+</div>
+
+<a href="/" class="ua">
+  <i class="fa-solid fa-house"></i>
+</a>
+
+<div class="sidebar">
+  <ul class="sidebar-list">
+    <% if(!currentUser) { %>
+    <li class="sidebar-item"><a href="user/sign_in" class="sidebar-anchor">로그인</a></li>
+    <% } %>
+    <% if(currentUser) { %>
+    <li class="sidebar-item"><a href="user/<%= currentUser.userID %>" class="sidebar-anchor">내 정보</a></li>
+    <li class="sidebar-item"><a href="user/sign_out" class="sidebar-anchor">로그아웃</a></li>
+    <li class="sidebar-item"><a href="post/new/<%= getPostQueryString() %>" class="sidebar-anchor">글쓰기</a></li>
+    <% } %>
+  </ul>
+</div>

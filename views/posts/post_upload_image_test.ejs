@@ -1,0 +1,21 @@
+<!-- views/posts/post_upload_image_test.ejs -->
+
+<div class="post-page">
+    <div class="form">
+        <img id="image" src="" alt="이미지를 업로드해주세요." width="76px" height="76px" />
+        <img id="image2" src="" alt="이미지를 업로드해주세요." width="76px" height="76px" />
+        <form action="/post/upload" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="title">이미지 업로드 테스트</label>
+                <input type="file" id="file" name="image" multiple>
+            </div>
+            
+            <div>
+                <label for="body">업로드</label>
+                <button type = "submit">제출</button>
+            </div>
+        
+        </form>
+    </div>
+</div>
+<script src = "js/fileupload.js"></script>
