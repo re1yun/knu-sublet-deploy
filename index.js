@@ -53,7 +53,7 @@ db.once('open', function(){
     // CONNECTED TO MONGODB SERVER
     console.log("Connected to mongod server");
 });
-mongoose.connect('process.env.DATABASE_URL');
+mongoose.connect(process.env.DATABASE_URL);
 
 //server starts
 var server = app.listen(3000, function(){
