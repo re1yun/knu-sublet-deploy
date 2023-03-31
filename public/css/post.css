@@ -73,6 +73,8 @@
 }
 
 .post-photo img {
+  max-width: 500px;
+  max-height: 550px;
   width: 100%;
   height: auto;
   margin-bottom: 20px;
@@ -279,6 +281,6 @@
 .modal-content {
   margin: auto;
   display: block;
-  max-width: 80%;
-  max-height: 80%;
+  max-width: 95%;
+  max-height: 95%;
 }

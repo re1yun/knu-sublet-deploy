@@ -9,19 +9,20 @@ module.exports = function(app){
     const mongoose = require('mongoose');
     const path = require('path');
     const multer = require('multer');
-    const stroage = multer.diskStorage({
-        destination: function(req, file, cb){
-            cb(null, 'public/uploads/');
-        },
-        filename: function(req, file, cb){
-            const ext = path.extname(file.originalname);
-            const basename = path.basename(file.originalname, ext);
-            cb(null, basename + new Date().valueOf() + ext);
-        }
-    });
+    // const stroage = multer.diskStorage({
+    //     destination: function(req, file, cb){
+    //         cb(null, 'public/uploads/');
+    //     },
+    //     filename: function(req, file, cb){
+    //         const ext = path.extname(file.originalname);
+    //         const basename = path.basename(file.originalname, ext);
+    //         cb(null, basename + new Date().valueOf() + ext);
+    //     }
+    // });
 
     const upload = multer({ 
-        storage: stroage
+        storage : multer.memoryStorage(),
+        limits: { fileSize: 10 * 1024 * 1024 } // 10MB
     });
 
     router.route('/new')
@@ -36,21 +37,39 @@ module.exports = function(app){
         })
         .post(util.isLoggedin, upload.array('image'), async function(req, res){
             req.body.author = req.user._id;
-
+            // stop process while processing image
             try {
                 console.log("post creation start on post");
                 const post = await Post.create(req.body);
                 console.log("post creation success on post");
 
-                // iterate through files and create new file instance
-                for (var i = 0; i < req.files.length; i++) {
-                    var file = req.files[i];
-                    var newFilePromise = File.createNewInstance(file, req.user._id, post._id);
-                    var newFileId = await newFilePromise;
-                    post.attachment.push(newFileId);
-                }
+                const uploadPromises = req.files.map((file) => {
+                    return new Promise((resolve, reject) => {
+                        app.locals.imagekit.upload({
+                            file : file.buffer, //required
+                            fileName : file.originalname,   //required
+                        }, function(error, result) {
+                            if(error) {
+                                console.log(error);
+                                reject(error);
+                            } else {
+                                console.log("post attachment start on post");
+                                File.createNewInstance(file, req.user._id, post._id, result.url)
+                                .then((newFileId) => {
+                                    post.attachment.push(newFileId);
+                                    console.log("post attachment success on post");
+                                    resolve();
+                                })
+                                .catch((err) => {
+                                    console.log(err);
+                                    reject(err);
+                                });
+                            }
+                        });
+                    });
+                });
                 
-                console.log("post attachment success on post");
+                await Promise.all(uploadPromises);
                 await post.save();
         
                 res.redirect('/post/' + post._id + res.locals.getPostQueryString());
@@ -73,13 +92,19 @@ module.exports = function(app){
                 title: 'posts/post_upload_image_test'
             })
         })
-        .post(upload.array('image'), function(req, res){
-            if (req.files) {
-                console.log('File uploaded successfully.');
-            } else {
-                console.log('Error uploading file:', req.files.error);
+        .post(upload.array('image'), async function(req, res){
+            var fileList = [];
+            console.log(req.files)
+            for(var i = 0; i < req.files.length; i++){
+                app.locals.imagekit.upload({
+                    file : req.files[i].buffer, //required
+                    fileName : req.files[i].originalname,   //required
+                }, function(error, result) {
+                    if(error) console.log(error);
+                    else console.log(result);
+                });
             }
-            res.redirect('/');
+        res.redirect('/');
         })
     ;
     
@@ -122,13 +147,35 @@ module.exports = function(app){
             const post = await Post.findOne({_id: req.params.id});
             if(req.files){
                 console.log("additional files found");
-                // iterate through files and create new file instance
-                for (var i = 0; i < req.files.length; i++) {
-                    var file = req.files[i];
-                    var newFilePromise = File.createNewInstance(file, req.user._id, req.params._id);
-                    var newFileId = await newFilePromise;
-                    post.attachment.push(newFileId);
-                }
+                const uploadPromises = req.files.map((file) => {
+                    return new Promise((resolve, reject) => {
+                        app.locals.imagekit.upload({
+                            file : file.buffer, //required
+                            fileName : file.originalname,   //required
+                        }, function(error, result) {
+                            if(error) {
+                                console.log(error);
+                                reject(error);
+                            } else {
+                                console.log("post attachment start on post");
+                                File.createNewInstance(file, req.user._id, post._id, result.url)
+                                .then((newFileId) => {
+                                    post.attachment.push(newFileId);
+                                    console.log("post attachment success on post");
+                                    resolve();
+                                })
+                                .catch((err) => {
+                                    console.log(err);
+                                    reject(err);
+                                });
+                            }
+                        });
+                    });
+                });
+
+                await Promise.all(uploadPromises);
+
+                
             }
 
             // delete selected files
@@ -169,6 +216,8 @@ module.exports = function(app){
                     if(err) console.log(err);
                     post.views++;
                     await post.save();
+                    console.log("found post");
+                    console.log(post);
                     res.render('index', {
                         title: 'posts/post_info',
                         post: post

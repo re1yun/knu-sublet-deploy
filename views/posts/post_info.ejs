@@ -5,10 +5,10 @@
         <h1 class="post-title"><%= post.title %></h1>
         <div class="post-details">
             <div class="post-info">
-            <i class="fas fa-map-marker-alt"></i>
-            <span class="post-location"><%= post.location %></span>
-            <i class="fas fa-user"></i>
-            <span class="post-author"><%= post.author.userID %></span>
+                <i class="fas fa-map-marker-alt"></i>
+                <span class="post-location"><%= post.location %></span>
+                    <i class="fas fa-user"></i>
+                <span class="post-author"><%= post.author.userID %></span>
             </div>
             <div class="post-meta">
                 <span class="post-date">
@@ -25,15 +25,16 @@
         </div>
         <div class="post-photo">
             <% if(post.attachment && post.attachment.length > 0) { %>
-              <div class="image-container current">
-                <img src="/uploads/<%= post.attachment[0].serverFileName %>" alt="사진이 없습니다." />
-              </div>
-              <% if(post.attachment.length > 1) { %>
-                <div class="image-navigation">
-                  <button class="prev-button">Prev</button>
-                  <button class="next-button">Next</button>
+                <% let cur = 0; while(post.attachment[cur].isDeleted != false) cur++; %>
+                <div class="image-container current">
+                    <img src="<%= post.attachment[cur].fileURL %>" alt="사진이 없습니다." />
                 </div>
-              <% } %>
+                <% if(post.attachment.length > 1) { %>
+                    <div class="image-navigation">
+                        <button class="prev-button">Prev</button>
+                        <button class="next-button">Next</button>
+                    </div>
+                <% } %>
             <% } else { %>
               <p>There are no photos for this post.</p>
             <% } %>
@@ -49,10 +50,10 @@
                 <p><%= post.body %></p>
             </div>
             <div class="post-actions">
-            <a href="/<%= getPostQueryString() %>">뒤로가기</a>
-            <% if(currentUser && currentUser.userID == post.author.userID) { %>
-                <a href="/post/<%= post._id %>/edit<%= getPostQueryString() %>">편집하기</a>
-            <% } %>
+                <a href="/<%= getPostQueryString() %>">뒤로가기</a>
+                <% if(currentUser && currentUser.userID == post.author.userID) { %>
+                    <a href="/post/<%= post._id %>/edit<%= getPostQueryString() %>">편집하기</a>
+                <% } %>
             </div>
         </div>
     </div>
@@ -65,23 +66,24 @@
     const imageContainer = document.querySelector('.image-container.current');
     const image = imageContainer.querySelector('img');
     let currentIndex = 0;
+    while(post.attachment[currentIndex].isDeleted === true){
+        currentIndex = (currentIndex + 1)% post.attachment.length;
+    }
   
     prevButton.addEventListener('click', () => {
-        if (currentIndex === 0) {
-            currentIndex = post.attachment.length - 1;
-        } else {
-            currentIndex--;
+        currentIndex = (currentIndex - 1 + post.attachment.length)% post.attachment.length;
+        while(post.attachment[currentIndex].isDeleted === true){
+            currentIndex = (currentIndex - 1 + post.attachment.length)% post.attachment.length;
         }
-        image.src = '/uploads/' + post.attachment[currentIndex].serverFileName;
+        image.src = post.attachment[currentIndex].fileURL;
     });
   
     nextButton.addEventListener('click', () => {
-        if (currentIndex === post.attachment.length - 1) {
-            currentIndex = 0;
-        } else {
-            console.log(currentIndex++);
+        currentIndex = (currentIndex + 1)% post.attachment.length;
+        while(post.attachment[currentIndex].isDeleted === true){
+            currentIndex = (currentIndex + 1)% post.attachment.length;
         }
-        image.src = '/uploads/' + post.attachment[currentIndex].serverFileName;
+        image.src = post.attachment[currentIndex].fileURL;
     });
 
     const modal = document.querySelector('.post-photo-modal');
